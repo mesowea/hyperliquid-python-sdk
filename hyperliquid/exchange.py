@@ -61,7 +61,7 @@ class Exchange(API):
         payload = {
             "action": action,
             "nonce": nonce,
-            "isFrontend": True,
+            "isFrontend": True, 
             "signature": signature,
             "vaultAddress": self.vault_address,
         }
