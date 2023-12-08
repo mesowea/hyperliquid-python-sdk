@@ -251,6 +251,8 @@ class Info(API):
                 ...
             ]
         """
+        raise Exception (str(self.base_url))
+    
         req = {"coin": coin, "interval": interval, "startTime": startTime, "endTime": endTime}
         return self.post("/info", {"type": "candleSnapshot", "req": req})
 
