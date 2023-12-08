@@ -221,6 +221,7 @@ class Info(API):
                 time: int
             }
         """
+        raise Exception (str(self.base_url))
         return self.post("/info", {"type": "l2Book", "coin": coin})
 
     def candles_snapshot(self, coin: str, interval: str, startTime: int, endTime: int) -> Any:
@@ -251,8 +252,6 @@ class Info(API):
                 ...
             ]
         """
-        raise Exception (str(self.base_url))
-    
         req = {"coin": coin, "interval": interval, "startTime": startTime, "endTime": endTime}
         return self.post("/info", {"type": "candleSnapshot", "req": req})
 
