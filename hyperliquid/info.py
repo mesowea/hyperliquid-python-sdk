@@ -196,6 +196,24 @@ class Info(API):
             )
         return self.post("/info", {"type": "fundingHistory", "coin": coin, "startTime": startTime})
 
+    def user_funding_history(self, user: str, startTime: int, endTime: Optional[int] = None) -> Any:
+        """Retrieve a user's funding history
+        POST /info
+        Args:
+            user (str): Address of the user in 42-character hexadecimal format.
+            startTime (int): Start time in milliseconds, inclusive.
+            endTime (int, optional): End time in milliseconds, inclusive. Defaults to current time.
+        Returns:
+            List[Dict]: A list of funding history records, where each record contains:
+                - user (str): User address.
+                - type (str): Type of the record, e.g., "userFunding".
+                - startTime (int): Unix timestamp of the start time in milliseconds.
+                - endTime (int): Unix timestamp of the end time in milliseconds.
+        """
+        if endTime is not None:
+            return self.post("/info", {"type": "userFunding", "user": user, "startTime": startTime, "endTime": endTime})
+        return self.post("/info", {"type": "userFunding", "user": user, "startTime": startTime})
+
     def l2_snapshot(self, coin: str) -> Any:
         """Retrieve L2 snapshot for a given coin
 
@@ -259,6 +277,12 @@ class Info(API):
 
     def query_order_by_cloid(self, user: str, cloid: Cloid) -> Any:
         return self.post("/info", {"type": "orderStatus", "user": user, "oid": cloid.to_raw()})
+
+    def query_referral_state(self, user: str) -> Any:
+        return self.post("/info", {"type": "referral", "user": user})
+
+    def query_sub_accounts(self, user: str) -> Any:
+        return self.post("/info", {"type": "subAccounts", "user": user})
 
     def subscribe(self, subscription: Subscription, callback: Callable[[Any], None]) -> int:
         if self.ws_manager is None:

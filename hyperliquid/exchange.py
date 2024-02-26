@@ -16,6 +16,7 @@ from hyperliquid.utils.signing import (
     OrderRequest,
     OrderType,
     OrderWire,
+    ScheduleCancelAction,
     float_to_usd_int,
     get_timestamp_ms,
     order_request_to_order_wire,
@@ -279,6 +280,33 @@ class Exchange(API):
             timestamp,
         )
 
+    def schedule_cancel(self, time: Optional[int]) -> Any:
+        """Schedules a time (in UTC millis) to cancel all open orders. The time must be at least 5 seconds after the current time.
+        Once the time comes, all open orders will be canceled and a trigger count will be incremented. The max number of triggers
+        per day is 10. This trigger count is reset at 00:00 UTC.
+
+        Args:
+            time (int): if time is not None, then set the cancel time in the future. If None, then unsets any cancel time in the future.
+        """
+        timestamp = get_timestamp_ms()
+        schedule_cancel_action: ScheduleCancelAction = {
+            "type": "scheduleCancel",
+        }
+        if time is not None:
+            schedule_cancel_action["time"] = time
+        signature = sign_l1_action(
+            self.wallet,
+            schedule_cancel_action,
+            self.vault_address,
+            timestamp,
+            self.base_url == MAINNET_API_URL,
+        )
+        return self._post_action(
+            schedule_cancel_action,
+            signature,
+            timestamp,
+        )
+
     def update_leverage(self, leverage: int, coin: str, is_cross: bool = True) -> Any:
         timestamp = get_timestamp_ms()
         asset = self.coin_to_asset[coin]
@@ -320,6 +348,65 @@ class Exchange(API):
         )
         return self._post_action(
             update_isolated_margin_action,
+            signature,
+            timestamp,
+        )
+
+    def set_referrer(self, code: str) -> Any:
+        timestamp = get_timestamp_ms()
+        set_referrer_action = {
+            "type": "setReferrer",
+            "code": code,
+        }
+        signature = sign_l1_action(
+            self.wallet,
+            set_referrer_action,
+            None,
+            timestamp,
+            self.base_url == MAINNET_API_URL,
+        )
+        return self._post_action(
+            set_referrer_action,
+            signature,
+            timestamp,
+        )
+
+    def create_sub_account(self, name: str) -> Any:
+        timestamp = get_timestamp_ms()
+        create_sub_account_action = {
+            "type": "createSubAccount",
+            "name": name,
+        }
+        signature = sign_l1_action(
+            self.wallet,
+            create_sub_account_action,
+            None,
+            timestamp,
+            self.base_url == MAINNET_API_URL,
+        )
+        return self._post_action(
+            create_sub_account_action,
+            signature,
+            timestamp,
+        )
+
+    def sub_account_transfer(self, sub_account_user: str, is_deposit: bool, usd: int) -> Any:
+        timestamp = get_timestamp_ms()
+        sub_account_transfer_action = {
+            "type": "subAccountTransfer",
+            "subAccountUser": sub_account_user,
+            "isDeposit": is_deposit,
+            "usd": usd,
+        }
+        signature = sign_l1_action(
+            self.wallet,
+            sub_account_transfer_action,
+            None,
+            timestamp,
+            self.base_url == MAINNET_API_URL,
+        )
+        return self._post_action(
+            sub_account_transfer_action,
             signature,
             timestamp,
         )

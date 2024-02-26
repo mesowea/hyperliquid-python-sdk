@@ -65,6 +65,14 @@ ModifyWire = TypedDict(
     },
 )
 
+ScheduleCancelAction = TypedDict(
+    "ScheduleCancelAction",
+    {
+        "type": Literal["scheduleCancel"],
+        "time": NotRequired[Optional[int]],
+    },
+)
+
 
 def order_type_to_wire(order_type: OrderType) -> OrderTypeWire:
     if "limit" in order_type:
@@ -72,9 +80,9 @@ def order_type_to_wire(order_type: OrderType) -> OrderTypeWire:
     elif "trigger" in order_type:
         return {
             "trigger": {
+                "isMarket": order_type["trigger"]["isMarket"],
                 "triggerPx": float_to_wire(order_type["trigger"]["triggerPx"]),
                 "tpsl": order_type["trigger"]["tpsl"],
-                "isMarket": order_type["trigger"]["isMarket"],
             }
         }
     raise ValueError("Invalid order type", order_type)
